@@ -1,0 +1,15 @@
+com\placement\portal\entity\DriveApplication.class
+com\placement\portal\exception\ResourceNotFoundException.class
+com\placement\portal\PlacementPortalApplication.class
+com\placement\portal\service\PlacementService.class
+com\placement\portal\repository\DriveApplicationRepository.class
+com\placement\portal\dto\ApiResponse.class
+com\placement\portal\controller\PlacementController.class
+com\placement\portal\entity\CompanyDrive.class
+com\placement\portal\entity\Student.class
+com\placement\portal\exception\DuplicateResourceException.class
+com\placement\portal\exception\GlobalExceptionHandler.class
+com\placement\portal\service\PlacementServiceImpl.class
+com\placement\portal\dto\DriveApplicationRequest.class
+com\placement\portal\repository\DriveRepository.class
+com\placement\portal\repository\StudentRepository.class

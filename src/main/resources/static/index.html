@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Campus Placement & Drive Management Portal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --portal-primary: #2563eb;
+            --portal-primary-hover: #1d4ed8;
+            --portal-surface: #f8fafc;
+            --portal-card-bg: #ffffff;
+            --portal-text-main: #0f172a;
+            --portal-border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--portal-surface);
+            color: var(--portal-text-main);
+            min-height: 100vh;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-card {
+            border: 1px solid var(--portal-border);
+            border-radius: 12px;
+            background: white;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        .card-custom {
+            border: 1px solid var(--portal-border);
+            border-radius: 14px;
+            background: white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header-custom {
+            background-color: transparent;
+            border-bottom: 1px solid var(--portal-border);
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .branch-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.35em 0.65em;
+            border-radius: 6px;
+        }
+
+        .branch-CSE { background-color: #dbeafe; color: #1e40af; }
+        .branch-ECE { background-color: #fef3c7; color: #92400e; }
+        .branch-IT  { background-color: #e0e7ff; color: #3730a3; }
+        .branch-MECH { background-color: #fee2e2; color: #991b1b; }
+        .branch-CIVIL { background-color: #f3e8ff; color: #6b21a8; }
+
+        .cgpa-high { background-color: #dcfce7; color: #166534; }
+        .cgpa-mid  { background-color: #fef9c3; color: #854d0e; }
+        .cgpa-low  { background-color: #fee2e2; color: #991b1b; }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .table > :not(caption) > * > * {
+            padding: 0.9rem 1rem;
+            vertical-align: middle;
+        }
+
+        .filter-panel {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .toast-container {
+            z-index: 1090;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm py-3">
+        <div class="container-fluid px-lg-5">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                <span class="bg-primary text-white rounded p-1 d-inline-flex align-items-center justify-content-center" style="width:32px; height:32px;">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </span>
+                <span>Placement<span class="text-primary">Portal</span></span>
+                <span class="badge bg-secondary ms-2 fw-normal" style="font-size: 0.7rem;">v1.0 Production</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-3">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#section-filter"><i class="bi bi-funnel-fill me-1"></i> Live Eligibility Filter</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#section-student"><i class="bi bi-person-plus-fill me-1"></i> Register Student</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#section-drive"><i class="bi bi-briefcase-fill me-1"></i> Post Drive</a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-sm btn-outline-light d-flex align-items-center gap-1" onclick="fetchDashboardStats(); fetchEligibleStudents();">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid px-lg-5 py-4">
+
+        <!-- KPI Statistic Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="stat-card p-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-medium">Total Registered Students</div>
+                        <div class="h3 fw-bold mb-0" id="stat-total-students">--</div>
+                    </div>
+                    <div class="stat-icon bg-primary-subtle text-primary">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="stat-card p-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-medium">Active Placement Drives</div>
+                        <div class="h3 fw-bold mb-0" id="stat-total-drives">--</div>
+                    </div>
+                    <div class="stat-icon bg-success-subtle text-success">
+                        <i class="bi bi-buildings-fill"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="stat-card p-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-medium">Batch Average CGPA</div>
+                        <div class="h3 fw-bold mb-0" id="stat-avg-cgpa">--</div>
+                    </div>
+                    <div class="stat-icon bg-warning-subtle text-warning">
+                        <i class="bi bi-award-fill"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="stat-card p-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-medium">Total Applications Filed</div>
+                        <div class="h3 fw-bold mb-0" id="stat-total-apps">--</div>
+                    </div>
+                    <div class="stat-icon bg-info-subtle text-info">
+                        <i class="bi bi-file-earmark-check-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION C: Real-Time Eligibility Filter & Dynamic Table -->
+        <div class="card card-custom mb-4" id="section-filter">
+            <div class="card-header-custom d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <h5 class="mb-1 text-primary d-flex align-items-center gap-2">
+                        <i class="bi bi-funnel-fill"></i> Real-Time Candidate Eligibility Filter
+                    </h5>
+                    <p class="text-muted small mb-0">Dynamic candidate screening based on minimum CGPA, backlog thresholds, and academic branch criteria.</p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="resetFilters()">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
+                    </button>
+                    <button class="btn btn-sm btn-success" onclick="exportToCsv()">
+                        <i class="bi bi-filetype-csv me-1"></i> Export Eligible (CSV)
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- Filter Controls Panel -->
+                <div class="filter-panel mb-4">
+                    <div class="row g-3 align-items-end">
+                        
+                        <!-- Min CGPA Slider & Number Box -->
+                        <div class="col-12 col-md-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="filter-cgpa-range" class="form-label mb-0 fw-semibold">
+                                    <i class="bi bi-graph-up me-1"></i> Minimum CGPA: <span id="display-cgpa-val" class="text-primary fw-bold">7.0</span>
+                                </label>
+                            </div>
+                            <div class="input-group">
+                                <input type="range" class="form-range flex-grow-1 align-self-center me-2" id="filter-cgpa-range" min="0" max="10" step="0.1" value="7.0">
+                                <input type="number" class="form-control form-control-sm text-center fw-bold" id="filter-cgpa-num" min="0" max="10" step="0.1" value="7.0" style="max-width: 75px;">
+                            </div>
+                        </div>
+
+                        <!-- Max Backlogs Dropdown -->
+                        <div class="col-12 col-md-3">
+                            <label for="filter-backlogs" class="form-label fw-semibold">
+                                <i class="bi bi-exclamation-triangle me-1"></i> Maximum Backlogs Allowed
+                            </label>
+                            <select id="filter-backlogs" class="form-select form-select-sm">
+                                <option value="0" selected>0 (No Active Backlogs - Strict)</option>
+                                <option value="1">Up to 1 Backlog</option>
+                                <option value="2">Up to 2 Backlogs</option>
+                                <option value="10">Any / No Backlog Restriction</option>
+                            </select>
+                        </div>
+
+                        <!-- Allowed Branches Multi-Select Checkboxes -->
+                        <div class="col-12 col-md-5">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label mb-0 fw-semibold"><i class="bi bi-diagram-3 me-1"></i> Target Branches</label>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-link p-0 text-decoration-none small me-2" onclick="selectAllBranches(true)">Select All</button>
+                                    <button type="button" class="btn btn-link p-0 text-decoration-none small text-danger" onclick="selectAllBranches(false)">Clear</button>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2 pt-1" id="branch-checkboxes-container">
+                                <div class="form-check form-check-inline me-1">
+                                    <input class="form-check-input branch-filter-chk" type="checkbox" id="chk-cse" value="CSE" checked>
+                                    <label class="form-check-label badge branch-CSE" for="chk-cse">CSE</label>
+                                </div>
+                                <div class="form-check form-check-inline me-1">
+                                    <input class="form-check-input branch-filter-chk" type="checkbox" id="chk-it" value="IT" checked>
+                                    <label class="form-check-label badge branch-IT" for="chk-it">IT</label>
+                                </div>
+                                <div class="form-check form-check-inline me-1">
+                                    <input class="form-check-input branch-filter-chk" type="checkbox" id="chk-ece" value="ECE" checked>
+                                    <label class="form-check-label badge branch-ECE" for="chk-ece">ECE</label>
+                                </div>
+                                <div class="form-check form-check-inline me-1">
+                                    <input class="form-check-input branch-filter-chk" type="checkbox" id="chk-mech" value="MECH">
+                                    <label class="form-check-label badge branch-MECH" for="chk-mech">MECH</label>
+                                </div>
+                                <div class="form-check form-check-inline me-0">
+                                    <input class="form-check-input branch-filter-chk" type="checkbox" id="chk-civil" value="CIVIL">
+                                    <label class="form-check-label badge branch-CIVIL" for="chk-civil">CIVIL</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Drive Preset Quick-Sync -->
+                        <div class="col-12 mt-2 pt-2 border-top border-secondary-subtle d-flex flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="d-flex align-items-center gap-2 flex-grow-1" style="max-width: 480px;">
+                                <span class="small text-muted fw-semibold text-nowrap"><i class="bi bi-magic me-1"></i> Quick Preset from Drive:</span>
+                                <select id="drive-preset-select" class="form-select form-select-sm" onchange="applyDrivePreset(this.value)">
+                                    <option value="">-- Choose Active Company Drive --</option>
+                                </select>
+                            </div>
+                            <div class="small text-muted" id="filter-summary-text">
+                                Filtering candidates...
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Table Filter & Search Controls -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary fs-6 fw-semibold" id="eligible-count-badge">0 Candidates</span>
+                        <span class="text-muted small">meet all criteria</span>
+                    </div>
+                    <div class="input-group input-group-sm" style="max-width: 280px;">
+                        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="table-search-input" class="form-control" placeholder="Search in table..." onkeyup="filterTableLocally()">
+                    </div>
+                </div>
+
+                <!-- Candidates Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="eligible-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th>Student Details</th>
+                                <th>Branch</th>
+                                <th>CGPA</th>
+                                <th>Active Backlogs</th>
+                                <th>Contact Information</th>
+                                <th class="text-center">Eligibility Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="candidates-table-body">
+                            <!-- Populated dynamically via JS -->
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                    Loading eligible candidates from database...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Two Column Forms Row -->
+        <div class="row g-4">
+            
+            <!-- SECTION A: Student Registration Form -->
+            <div class="col-12 col-lg-6" id="section-student">
+                <div class="card card-custom h-100">
+                    <div class="card-header-custom d-flex align-items-center justify-content-between">
+                        <span class="d-flex align-items-center gap-2 text-dark">
+                            <i class="bi bi-person-plus-fill text-primary"></i>
+                            <span>Section A: Register New Student</span>
+                        </span>
+                        <span class="badge bg-light text-secondary border">Academic Profiles</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="student-reg-form" onsubmit="handleStudentRegistration(event)" novalidate>
+                            <div class="row g-3">
+                                
+                                <div class="col-md-6">
+                                    <label class="form-label" for="std-roll">Roll Number <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                                        <input type="text" class="form-control" id="std-roll" placeholder="e.g. 21CS088" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label" for="std-name">Full Name <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                        <input type="text" class="form-control" id="std-name" placeholder="e.g. John Doe" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label" for="std-email">Campus Email <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                        <input type="email" class="form-control" id="std-email" placeholder="john.doe@campus.edu" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label" for="std-phone">Phone Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                        <input type="tel" class="form-control" id="std-phone" placeholder="+91-9876543210">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label" for="std-branch">Branch <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="std-branch" required>
+                                        <option value="" disabled selected>Select Branch</option>
+                                        <option value="CSE">CSE</option>
+                                        <option value="IT">IT</option>
+                                        <option value="ECE">ECE</option>
+                                        <option value="MECH">MECH</option>
+                                        <option value="CIVIL">CIVIL</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label" for="std-cgpa">Current CGPA <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-award"></i></span>
+                                        <input type="number" class="form-control" id="std-cgpa" step="0.01" min="0.0" max="10.0" placeholder="e.g. 8.45" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label" for="std-backlogs">Active Backlogs <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-x-circle"></i></span>
+                                        <input type="number" class="form-control" id="std-backlogs" min="0" max="20" value="0" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mt-4 pt-2">
+                                    <button type="submit" id="btn-submit-student" class="btn btn-primary w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2">
+                                        <i class="bi bi-check-circle-fill"></i> Register Student Profile
+                                    </button>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION B: Company Drive Creation Form -->
+            <div class="col-12 col-lg-6" id="section-drive">
+                <div class="card card-custom h-100">
+                    <div class="card-header-custom d-flex align-items-center justify-content-between">
+                        <span class="d-flex align-items-center gap-2 text-dark">
+                            <i class="bi bi-buildings-fill text-success"></i>
+                            <span>Section B: Create Company Placement Drive</span>
+                        </span>
+                        <span class="badge bg-light text-secondary border">Corporate Recruitment</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="drive-create-form" onsubmit="handleDriveCreation(event)" novalidate>
+                            <div class="row g-3">
+                                
+                                <div class="col-md-6">
+                                    <label class="form-label" for="drv-company">Company Name <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-building"></i></span>
+                                        <input type="text" class="form-control" id="drv-company" placeholder="e.g. Amazon, Google" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label" for="drv-role">Job Role <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
+                                        <input type="text" class="form-control" id="drv-role" placeholder="e.g. Software Engineer" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label" for="drv-pkg">Package (LPA) <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        <input type="number" class="form-control" id="drv-pkg" step="0.1" min="0.5" placeholder="e.g. 16.0" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label" for="drv-min-cgpa">Min CGPA Required <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-graph-up"></i></span>
+                                        <input type="number" class="form-control" id="drv-min-cgpa" step="0.1" min="0.0" max="10.0" placeholder="e.g. 7.5" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label" for="drv-max-backlogs">Max Backlogs Allowed <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="drv-max-backlogs" required>
+                                        <option value="0" selected>0 (No Backlogs)</option>
+                                        <option value="1">Up to 1 Backlog</option>
+                                        <option value="2">Up to 2 Backlogs</option>
+                                        <option value="3">Up to 3 Backlogs</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label" for="drv-date">Drive / Interview Date <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                        <input type="date" class="form-control" id="drv-date" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label" for="drv-status">Drive Status</label>
+                                    <select class="form-select" id="drv-status">
+                                        <option value="UPCOMING" selected>UPCOMING</option>
+                                        <option value="IN_PROGRESS">IN_PROGRESS</option>
+                                        <option value="COMPLETED">COMPLETED</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label d-block">Eligible Academic Branches <span class="text-danger">*</span></label>
+                                    <div class="d-flex flex-wrap gap-3 pt-1">
+                                        <div class="form-check">
+                                            <input class="form-check-input drive-branch-opt" type="checkbox" id="drv-br-cse" value="CSE" checked>
+                                            <label class="form-check-label" for="drv-br-cse">CSE</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input drive-branch-opt" type="checkbox" id="drv-br-it" value="IT" checked>
+                                            <label class="form-check-label" for="drv-br-it">IT</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input drive-branch-opt" type="checkbox" id="drv-br-ece" value="ECE" checked>
+                                            <label class="form-check-label" for="drv-br-ece">ECE</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input drive-branch-opt" type="checkbox" id="drv-br-mech" value="MECH">
+                                            <label class="form-check-label" for="drv-br-mech">MECH</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input drive-branch-opt" type="checkbox" id="drv-br-civil" value="CIVIL">
+                                            <label class="form-check-label" for="drv-br-civil">CIVIL</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mt-4 pt-2">
+                                    <button type="submit" id="btn-submit-drive" class="btn btn-success w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2">
+                                        <i class="bi bi-briefcase-fill"></i> Publish Placement Drive
+                                    </button>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Quick Apply Modal -->
+    <div class="modal fade" id="applyModal" tabindex="-1" aria-labelledby="applyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="applyModalLabel"><i class="bi bi-send-check me-2 text-primary"></i>Apply Student for Drive</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted mb-3">Submit this candidate's application to an active company placement drive.</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Selected Candidate:</label>
+                        <div id="modal-candidate-info" class="p-2 bg-light rounded border small"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="modal-drive-select" class="form-label fw-bold">Select Target Placement Drive:</label>
+                        <select id="modal-drive-select" class="form-select">
+                            <option value="">-- Select Drive --</option>
+                        </select>
+                    </div>
+                    <input type="hidden" id="modal-student-id">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="submitDriveApplication()">Confirm Application</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="liveToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-2" id="toast-message">
+                    <i class="bi bi-info-circle-fill"></i> Notification
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Vanilla JavaScript Application Logic -->
+    <script>
+        // API Base URL
+        const API_BASE = '/api/placement';
+
+        // State Store
+        let currentEligibleStudents = [];
+        let allAvailableDrives = [];
+        let filterDebounceTimer = null;
+
+        // Initialize application on DOM content loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            setupFilterSync();
+            fetchDashboardStats();
+            fetchAllDrives();
+            fetchEligibleStudents();
+
+            // Set default drive date to 1 week from today
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            document.getElementById('drv-date').value = nextWeek.toISOString().split('T')[0];
+        });
+
+        // --------------------------------------------------------------------
+        // Toast Notification Helper
+        // --------------------------------------------------------------------
+        function showToast(message, isSuccess = true) {
+            const toastEl = document.getElementById('liveToast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toastEl.className = `toast align-items-center text-white border-0 ${isSuccess ? 'bg-success' : 'bg-danger'}`;
+            toastMessage.innerHTML = `<i class="bi ${isSuccess ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2"></i> ${message}`;
+            
+            const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+            toast.show();
+        }
+
+        // --------------------------------------------------------------------
+        // Filter Inputs Sync & Event Handlers
+        // --------------------------------------------------------------------
+        function setupFilterSync() {
+            const rangeInput = document.getElementById('filter-cgpa-range');
+            const numInput = document.getElementById('filter-cgpa-num');
+            const displaySpan = document.getElementById('display-cgpa-val');
+            const backlogsSelect = document.getElementById('filter-backlogs');
+            const branchCheckboxes = document.querySelectorAll('.branch-filter-chk');
+
+            // Sync Slider -> Number Box
+            rangeInput.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value).toFixed(1);
+                numInput.value = val;
+                displaySpan.textContent = val;
+                debouncedFetchEligible();
+            });
+
+            // Sync Number Box -> Slider
+            numInput.addEventListener('input', (e) => {
+                let val = parseFloat(e.target.value);
+                if (isNaN(val)) val = 0.0;
+                if (val < 0) val = 0.0;
+                if (val > 10) val = 10.0;
+                rangeInput.value = val;
+                displaySpan.textContent = val.toFixed(1);
+                debouncedFetchEligible();
+            });
+
+            // Backlogs change
+            backlogsSelect.addEventListener('change', () => {
+                debouncedFetchEligible();
+            });
+
+            // Branch checkboxes change
+            branchCheckboxes.forEach(chk => {
+                chk.addEventListener('change', () => {
+                    debouncedFetchEligible();
+                });
+            });
+        }
+
+        function debouncedFetchEligible() {
+            clearTimeout(filterDebounceTimer);
+            filterDebounceTimer = setTimeout(fetchEligibleStudents, 250);
+        }
+
+        function selectAllBranches(select) {
+            document.querySelectorAll('.branch-filter-chk').forEach(chk => chk.checked = select);
+            fetchEligibleStudents();
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-cgpa-range').value = 7.0;
+            document.getElementById('filter-cgpa-num').value = 7.0;
+            document.getElementById('display-cgpa-val').textContent = '7.0';
+            document.getElementById('filter-backlogs').value = '0';
+            document.getElementById('chk-cse').checked = true;
+            document.getElementById('chk-it').checked = true;
+            document.getElementById('chk-ece').checked = true;
+            document.getElementById('chk-mech').checked = false;
+            document.getElementById('chk-civil').checked = false;
+            document.getElementById('drive-preset-select').value = '';
+            document.getElementById('table-search-input').value = '';
+            fetchEligibleStudents();
+        }
+
+        // --------------------------------------------------------------------
+        // API Calls & Rendering
+        // --------------------------------------------------------------------
+
+        // Fetch Dashboard KPI Stats
+        async function fetchDashboardStats() {
+            try {
+                const res = await fetch(`${API_BASE}/stats`);
+                if (!res.ok) return;
+                const json = await res.json();
+                if (json.success && json.data) {
+                    document.getElementById('stat-total-students').textContent = json.data.totalStudents ?? 0;
+                    document.getElementById('stat-total-drives').textContent = json.data.totalDrives ?? 0;
+                    document.getElementById('stat-avg-cgpa').textContent = (json.data.averageCgpa ?? 0).toFixed(2);
+                    document.getElementById('stat-total-apps').textContent = json.data.totalApplications ?? 0;
+                }
+            } catch (err) {
+                console.warn('Could not load statistics:', err);
+            }
+        }
+
+        // Fetch All Drives (to populate presets & application modal)
+        async function fetchAllDrives() {
+            try {
+                const res = await fetch(`${API_BASE}/drives`);
+                if (!res.ok) return;
+                const json = await res.json();
+                if (json.success && Array.isArray(json.data)) {
+                    allAvailableDrives = json.data;
+
+                    // Populate preset dropdown
+                    const presetSelect = document.getElementById('drive-preset-select');
+                    const modalDriveSelect = document.getElementById('modal-drive-select');
+                    
+                    presetSelect.innerHTML = '<option value="">-- Choose Active Company Drive --</option>';
+                    modalDriveSelect.innerHTML = '<option value="">-- Select Drive --</option>';
+
+                    allAvailableDrives.forEach(drv => {
+                        const opt = `<option value="${drv.id}">${drv.companyName} - ${drv.jobRole} (₹${drv.packageLpa} LPA | Min ${drv.minCgpa} CGPA)</option>`;
+                        presetSelect.innerHTML += opt;
+                        modalDriveSelect.innerHTML += opt;
+                    });
+                }
+            } catch (err) {
+                console.warn('Could not load drives:', err);
+            }
+        }
+
+        // Apply Drive Criteria to Filter
+        function applyDrivePreset(driveId) {
+            if (!driveId) return;
+            const drive = allAvailableDrives.find(d => d.id == driveId);
+            if (!drive) return;
+
+            // Set CGPA
+            document.getElementById('filter-cgpa-range').value = drive.minCgpa;
+            document.getElementById('filter-cgpa-num').value = drive.minCgpa;
+            document.getElementById('display-cgpa-val').textContent = Number(drive.minCgpa).toFixed(1);
+
+            // Set Backlogs
+            document.getElementById('filter-backlogs').value = drive.maxBacklogs;
+
+            // Set Branches
+            const allowed = drive.allowedBranches.split(',').map(b => b.trim().toUpperCase());
+            document.querySelectorAll('.branch-filter-chk').forEach(chk => {
+                chk.checked = allowed.includes(chk.value.toUpperCase());
+            });
+
+            fetchEligibleStudents();
+            showToast(`Applied filter criteria for ${drive.companyName}`, true);
+        }
+
+        // Fetch Eligible Students from API
+        async function fetchEligibleStudents() {
+            const minCgpa = parseFloat(document.getElementById('filter-cgpa-num').value) || 0.0;
+            const maxBacklogs = parseInt(document.getElementById('filter-backlogs').value);
+            
+            const selectedBranches = Array.from(document.querySelectorAll('.branch-filter-chk:checked'))
+                                         .map(chk => chk.value);
+
+            let url = `${API_BASE}/eligible?minCgpa=${encodeURIComponent(minCgpa)}&maxBacklogs=${encodeURIComponent(maxBacklogs)}`;
+            if (selectedBranches.length > 0) {
+                url += `&branches=${encodeURIComponent(selectedBranches.join(','))}`;
+            }
+
+            document.getElementById('filter-summary-text').textContent = 
+                `Criteria: Min CGPA ≥ ${minCgpa.toFixed(1)}, Backlogs ≤ ${maxBacklogs}, Branches: [${selectedBranches.join(', ') || 'Any'}]`;
+
+            try {
+                const res = await fetch(url);
+                const json = await res.json();
+
+                if (json.success && Array.isArray(json.data)) {
+                    currentEligibleStudents = json.data;
+                    renderStudentsTable(currentEligibleStudents);
+                } else {
+                    renderTableEmpty('Error fetching candidates: ' + (json.message || 'Unknown error'));
+                }
+            } catch (err) {
+                console.error('Fetch eligible error:', err);
+                renderTableEmpty('Unable to connect to backend server. Make sure the Spring Boot application is running.');
+            }
+        }
+
+        // Render Table Body
+        function renderStudentsTable(students) {
+            const tbody = document.getElementById('candidates-table-body');
+            const countBadge = document.getElementById('eligible-count-badge');
+            countBadge.textContent = `${students.length} Candidates`;
+
+            if (students.length === 0) {
+                renderTableEmpty('No candidates match the specified CGPA, backlog, or branch criteria.');
+                return;
+            }
+
+            let html = '';
+            students.forEach((std, index) => {
+                // Determine CGPA badge class
+                let cgpaClass = 'cgpa-low';
+                if (std.cgpa >= 8.0) cgpaClass = 'cgpa-high';
+                else if (std.cgpa >= 6.5) cgpaClass = 'cgpa-mid';
+
+                // Backlog badge
+                const backlogBadge = std.backlogs === 0 
+                    ? '<span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-shield-check me-1"></i>0 (Clean)</span>'
+                    : `<span class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="bi bi-exclamation-circle me-1"></i>${std.backlogs} Active</span>`;
+
+                html += `
+                    <tr>
+                        <td class="text-muted fw-semibold">${index + 1}</td>
+                        <td>
+                            <div class="fw-bold">${escapeHtml(std.fullName)}</div>
+                            <div class="text-muted small"><i class="bi bi-hash"></i>${escapeHtml(std.rollNumber)}</div>
+                        </td>
+                        <td>
+                            <span class="badge branch-badge branch-${escapeHtml(std.branch)}">${escapeHtml(std.branch)}</span>
+                        </td>
+                        <td>
+                            <span class="badge fs-6 ${cgpaClass}">${Number(std.cgpa).toFixed(2)}</span>
+                        </td>
+                        <td>${backlogBadge}</td>
+                        <td>
+                            <div class="small"><i class="bi bi-envelope me-1 text-muted"></i><a href="mailto:${escapeHtml(std.email)}" class="text-decoration-none">${escapeHtml(std.email)}</a></div>
+                            <div class="small text-muted"><i class="bi bi-telephone me-1"></i>${escapeHtml(std.phone || 'N/A')}</div>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                                <i class="bi bi-check-lg me-1"></i>Eligible
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary" onclick="openApplyModal(${std.id}, '${escapeHtml(std.fullName)}', '${escapeHtml(std.rollNumber)}', '${escapeHtml(std.branch)}')">
+                                <i class="bi bi-send-fill me-1"></i> Apply
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        function renderTableEmpty(message) {
+            const tbody = document.getElementById('candidates-table-body');
+            document.getElementById('eligible-count-badge').textContent = '0 Candidates';
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-5">
+                        <i class="bi bi-person-x text-muted" style="font-size: 2.5rem;"></i>
+                        <p class="mt-2 mb-0 text-muted">${message}</p>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Local Table Search
+        function filterTableLocally() {
+            const query = document.getElementById('table-search-input').value.toLowerCase().trim();
+            if (!query) {
+                renderStudentsTable(currentEligibleStudents);
+                return;
+            }
+            const filtered = currentEligibleStudents.filter(s => 
+                s.fullName.toLowerCase().includes(query) ||
+                s.rollNumber.toLowerCase().includes(query) ||
+                s.branch.toLowerCase().includes(query) ||
+                s.email.toLowerCase().includes(query)
+            );
+            renderStudentsTable(filtered);
+        }
+
+        // --------------------------------------------------------------------
+        // Section A: Student Registration Handler
+        // --------------------------------------------------------------------
+        async function handleStudentRegistration(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('btn-submit-student');
+            
+            const studentPayload = {
+                rollNumber: document.getElementById('std-roll').value.trim(),
+                fullName: document.getElementById('std-name').value.trim(),
+                email: document.getElementById('std-email').value.trim(),
+                phone: document.getElementById('std-phone').value.trim(),
+                branch: document.getElementById('std-branch').value,
+                cgpa: parseFloat(document.getElementById('std-cgpa').value),
+                backlogs: parseInt(document.getElementById('std-backlogs').value)
+            };
+
+            // Basic Validation
+            if (!studentPayload.rollNumber || !studentPayload.fullName || !studentPayload.email || !studentPayload.branch || isNaN(studentPayload.cgpa) || isNaN(studentPayload.backlogs)) {
+                showToast('Please fill out all mandatory fields correctly.', false);
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registering...';
+
+            try {
+                const res = await fetch(`${API_BASE}/students`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(studentPayload)
+                });
+                const json = await res.json();
+
+                if (res.ok && json.success) {
+                    showToast(`Student ${json.data.fullName} registered successfully!`, true);
+                    document.getElementById('student-reg-form').reset();
+                    fetchDashboardStats();
+                    fetchEligibleStudents();
+                } else {
+                    showToast(json.message || 'Error registering student', false);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error while registering student.', false);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Register Student Profile';
+            }
+        }
+
+        // --------------------------------------------------------------------
+        // Section B: Company Drive Creation Handler
+        // --------------------------------------------------------------------
+        async function handleDriveCreation(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('btn-submit-drive');
+
+            const selectedBranches = Array.from(document.querySelectorAll('.drive-branch-opt:checked'))
+                                         .map(cb => cb.value);
+
+            if (selectedBranches.length === 0) {
+                showToast('Please select at least one eligible branch for this drive.', false);
+                return;
+            }
+
+            const drivePayload = {
+                companyName: document.getElementById('drv-company').value.trim(),
+                jobRole: document.getElementById('drv-role').value.trim(),
+                packageLpa: parseFloat(document.getElementById('drv-pkg').value),
+                minCgpa: parseFloat(document.getElementById('drv-min-cgpa').value),
+                maxBacklogs: parseInt(document.getElementById('drv-max-backlogs').value),
+                allowedBranches: selectedBranches.join(','),
+                driveDate: document.getElementById('drv-date').value,
+                status: document.getElementById('drv-status').value
+            };
+
+            if (!drivePayload.companyName || !drivePayload.jobRole || isNaN(drivePayload.packageLpa) || isNaN(drivePayload.minCgpa) || !drivePayload.driveDate) {
+                showToast('Please fill out all mandatory fields.', false);
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Publishing...';
+
+            try {
+                const res = await fetch(`${API_BASE}/drives`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(drivePayload)
+                });
+                const json = await res.json();
+
+                if (res.ok && json.success) {
+                    showToast(`Drive for ${json.data.companyName} published successfully!`, true);
+                    document.getElementById('drive-create-form').reset();
+                    document.getElementById('drv-br-cse').checked = true;
+                    document.getElementById('drv-br-it').checked = true;
+                    document.getElementById('drv-br-ece').checked = true;
+                    fetchDashboardStats();
+                    fetchAllDrives();
+                } else {
+                    showToast(json.message || 'Error publishing drive', false);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error while publishing placement drive.', false);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-briefcase-fill"></i> Publish Placement Drive';
+            }
+        }
+
+        // --------------------------------------------------------------------
+        // Drive Application Modal & Submission
+        // --------------------------------------------------------------------
+        let applyModalInstance = null;
+
+        function openApplyModal(studentId, studentName, rollNumber, branch) {
+            document.getElementById('modal-student-id').value = studentId;
+            document.getElementById('modal-candidate-info').innerHTML = `
+                <div><strong>${studentName}</strong> (${rollNumber}) - Branch: ${branch}</div>
+            `;
+            if (!applyModalInstance) {
+                applyModalInstance = new bootstrap.Modal(document.getElementById('applyModal'));
+            }
+            applyModalInstance.show();
+        }
+
+        async function submitDriveApplication() {
+            const studentId = document.getElementById('modal-student-id').value;
+            const driveId = document.getElementById('modal-drive-select').value;
+
+            if (!driveId) {
+                showToast('Please select a target placement drive.', false);
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/apply`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ studentId: parseInt(studentId), driveId: parseInt(driveId) })
+                });
+                const json = await res.json();
+
+                if (res.ok && json.success) {
+                    showToast('Application successfully submitted!', true);
+                    applyModalInstance.hide();
+                    fetchDashboardStats();
+                } else {
+                    showToast(json.message || 'Could not submit application.', false);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error during application.', false);
+            }
+        }
+
+        // --------------------------------------------------------------------
+        // Export to CSV
+        // --------------------------------------------------------------------
+        function exportToCsv() {
+            if (!currentEligibleStudents || currentEligibleStudents.length === 0) {
+                showToast('No candidates available to export.', false);
+                return;
+            }
+
+            const headers = ['Roll Number', 'Full Name', 'Email', 'Branch', 'CGPA', 'Backlogs', 'Phone'];
+            const rows = currentEligibleStudents.map(s => [
+                `"${s.rollNumber}"`,
+                `"${s.fullName}"`,
+                `"${s.email}"`,
+                `"${s.branch}"`,
+                s.cgpa,
+                s.backlogs,
+                `"${s.phone || ''}"`
+            ]);
+
+            const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `Eligible_Candidates_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Eligible candidates exported to CSV.', true);
+        }
+
+        // --------------------------------------------------------------------
+        // Security Helper
+        // --------------------------------------------------------------------
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+    </script>
+</body>
+</html>
